@@ -1,0 +1,12 @@
+np_material,core,ligand,dtem,zeta,n_npunid,npunids,label
+0,PS,carboxylate,200,-63,2,"17,18",PS/carboxylate 200nm
+1,PS,PEG-2k,200,-7,1,34,PS/PEG-2k 200nm
+2,IO,citrate,82,-42,2,"19,28",IO/citrate 82nm
+3,IO-Au,PVP,98,-12,2,"24,25",IO-Au/PVP 98nm
+4,IO,citrate,182,-49,2,"20,26",IO/citrate 182nm
+5,IO-Au,PEG-5k,244,-3,1,31,IO-Au/PEG-5k 244nm
+6,IO-Au,PVP,182/244,-11,2,"23,30",IO-Au/PVP 182/244nm
+7,IO-Au,PEI,244,12,1,32,IO-Au/PEI 244nm
+8,IO,PEI,82,29,2,"21,29",IO/PEI 82nm
+9,IO,PEI,182,39,2,"22,27",IO/PEI 182nm
+10,IO-Au,PEI,98,12,1,33,IO-Au/PEI 98nm

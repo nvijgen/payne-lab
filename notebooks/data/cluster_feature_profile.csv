@@ -1,0 +1,11 @@
+feature,c0_mean,c1_mean,c2_mean,kruskal_H,p_value,target
+abundance_controls,-11.3816,-10.9515,-6.3828,175.2821,0.0,detection
+secondary_structure_fraction_sheet,0.2631,0.2487,0.2406,7.9642,0.0186,detection
+nsp_secondary_structure_coil,0.5283,0.5902,0.5599,10.7219,0.0047,detection
+fraction_exposed_exposed_k,0.1005,0.0928,0.0915,3.6724,0.1594,detection
+frac_aa_a,0.0745,0.0681,0.0659,9.9708,0.0068,detection
+abundance_controls,-10.3527,-10.3209,-8.7633,37.6915,0.0,enrichment
+secondary_structure_fraction_sheet,0.266,0.2353,0.2401,13.9217,0.0009,enrichment
+nsp_secondary_structure_coil,0.5222,0.5802,0.594,19.6451,0.0001,enrichment
+fraction_exposed_exposed_k,0.0993,0.1007,0.0858,7.1871,0.0275,enrichment
+frac_aa_a,0.0748,0.0656,0.0655,12.3697,0.0021,enrichment

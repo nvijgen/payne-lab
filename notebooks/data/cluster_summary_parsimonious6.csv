@@ -1,0 +1,7 @@
+cluster,n,mean_prob,zeta_sensitivity,target
+0,198,0.211,0.322,detection
+1,80,0.537,0.467,detection
+2,98,0.917,0.101,detection
+0,218,0.194,0.292,enrichment
+1,73,0.468,0.49,enrichment
+2,85,0.807,0.251,enrichment
