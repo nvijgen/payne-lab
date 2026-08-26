@@ -7515,8 +7515,7 @@ a.anchor-link {
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="Feature-importance-significance-testing">Feature-importance significance testing<a class="anchor-link" href="#Feature-importance-significance-testing">¶</a></h1><table>
 <thead>
 <tr>
@@ -7554,57 +7553,12 @@ are run. The Altmann null needs 1000 forest refits, so the notebook takes about 
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f5a91d14">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">statsmodels.stats.multitest</span><span class="w"> </span><span class="kn">import</span> <span class="n">multipletests</span>
-
-<span class="c1"># Data, feature columns and RF settings shared with the other notebooks: corona.py.</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">corona</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">DATA_DIR</span><span class="p">,</span>
-    <span class="n">RANDOM_SEED</span><span class="p">,</span>
-    <span class="n">RandomForestClassifier</span><span class="p">,</span>
-    <span class="n">RandomForestRegressor</span><span class="p">,</span>
-    <span class="n">feature_cols</span><span class="p">,</span>
-    <span class="n">load_data</span><span class="p">,</span>
-    <span class="n">oof_permutation_importance</span><span class="p">,</span>
-    <span class="n">rf_kwargs</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">N_PERM</span> <span class="o">=</span> <span class="mi">2000</span>  <span class="c1"># 1/(N_PERM + 1) must be &lt;= 0.05/84 for a lone feature to be detectable</span>
-<span class="n">PERM_REPEATS</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># repeats per fold for out-of-fold permutation importance</span>
-<span class="n">N_FOLDS</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="n">TOP_K</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># features entering the pairwise rank test</span>
-
-<span class="n">df</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
-<span class="n">feature_columns</span> <span class="o">=</span> <span class="n">feature_cols</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">feature_columns</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-<span class="n">proteins</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"entry"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-<span class="n">TARGETS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"RFC"</span><span class="p">:</span> <span class="p">(</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="s2">"enriched"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">"roc_auc"</span><span class="p">),</span>
-    <span class="s2">"RFR"</span><span class="p">:</span> <span class="p">(</span><span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">"abundance"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="s2">"neg_mean_absolute_error"</span><span class="p">),</span>
-<span class="p">}</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"n=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="si">}</span><span class="s2">, features=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_columns</span><span class="p">)</span><span class="si">}</span><span class="s2">, proteins=</span><span class="si">{</span><span class="n">df</span><span class="p">[</span><span class="s1">'entry'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=f5a91d14">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>n=6768, features=84, proteins=376
 </pre>
@@ -7617,8 +7571,7 @@ are run. The Altmann null needs 1000 forest refits, so the notebook takes about 
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Observed-importance-and-bootstrap-stability">Observed importance and bootstrap stability<a class="anchor-link" href="#Observed-importance-and-bootstrap-stability">¶</a></h2><p>Baseline Gini importance comes from a single fit on all rows. The cluster-bootstrap
 replicates resample whole proteins, preserving the within-protein correlation structure, and
 are read from the replicates <code>unified.ipynb</code> already produced rather than refitted, so the
@@ -7626,43 +7579,18 @@ intervals match those replicates exactly.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=2002be0f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">observed</span><span class="p">,</span> <span class="n">bootstrap</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
-<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">TARGETS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">observed</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-        <span class="n">Model</span><span class="p">(</span><span class="o">**</span><span class="n">rf_kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">feature_columns</span>
-    <span class="p">)</span>
-    <span class="n">raw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-        <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_bootstrap_importance_raw.csv"</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">"bootstrap_iter"</span><span class="p">)[</span><span class="n">feature_columns</span><span class="p">]</span>
-    <span class="n">bootstrap</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: observed Gini for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">observed</span><span class="p">[</span><span class="n">name</span><span class="p">])</span><span class="si">}</span><span class="s2"> features, "</span>
-          <span class="sa">f</span><span class="s2">"bootstrap </span><span class="si">{</span><span class="n">raw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> replicates"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=2002be0f">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>RFC: observed Gini for 84 features, bootstrap 500 replicates
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>RFR: observed Gini for 84 features, bootstrap 500 replicates
 </pre>
@@ -7675,8 +7603,7 @@ intervals match those replicates exactly.</p>
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Altmann-permutation-null">Altmann permutation null<a class="anchor-link" href="#Altmann-permutation-null">¶</a></h2><p>Permuting the target and refitting gives the importance the same forest assigns to each
 feature when the labels carry no information. The one-sided p-value is
 <code>(1 + #{null &gt;= observed}) / (1 + N_perm)</code>.</p>
@@ -7692,94 +7619,54 @@ floor is 0.00050 and a single feature can be resolved. The general requirement i
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f17ac0b1">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">altmann</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">TARGETS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_SEED</span><span class="p">)</span>
-    <span class="n">null</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">N_PERM</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_columns</span><span class="p">)))</span>
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_PERM</span><span class="p">):</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="n">rf_kwargs</span><span class="p">,</span> <span class="s2">"random_state"</span><span class="p">:</span> <span class="n">RANDOM_SEED</span> <span class="o">+</span> <span class="mi">10_000</span> <span class="o">+</span> <span class="n">k</span><span class="p">})</span>
-        <span class="n">null</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rng</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">feature_importances_</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">250</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: permutation </span><span class="si">{</span><span class="n">k</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">N_PERM</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="n">null_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">null</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">feature_columns</span><span class="p">)</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="n">null_df</span><span class="o">.</span><span class="n">ge</span><span class="p">(</span><span class="n">observed</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">N_PERM</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">altmann</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-        <span class="p">{</span>
-            <span class="s2">"null_mean"</span><span class="p">:</span> <span class="n">null_df</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
-            <span class="s2">"null_q95"</span><span class="p">:</span> <span class="n">null_df</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.95</span><span class="p">),</span>
-            <span class="s2">"p_altmann"</span><span class="p">:</span> <span class="n">p</span><span class="p">,</span>
-            <span class="s2">"p_altmann_bh"</span><span class="p">:</span> <span class="n">multipletests</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"fdr_bh"</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="p">(</span><span class="n">altmann</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">p_altmann_bh</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.05</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> features pass BH at 5%"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=f17ac0b1">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFC: permutation 250/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFC: permutation 500/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFC: permutation 750/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFC: permutation 1000/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFC: permutation 1250/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFC: permutation 1500/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFC: permutation 1750/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFC: permutation 2000/2000
 RFC: 32/84 features pass BH at 5%
@@ -7787,56 +7674,48 @@ RFC: 32/84 features pass BH at 5%
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFR: permutation 250/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFR: permutation 500/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFR: permutation 750/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFR: permutation 1000/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFR: permutation 1250/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFR: permutation 1500/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFR: permutation 1750/2000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  RFR: permutation 2000/2000
 RFR: 3/84 features pass BH at 5%
@@ -7845,52 +7724,12 @@ RFR: 3/84 features pass BH at 5%
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=3240d669">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># The features the tests turn on: those the regressor resolves, and the continuous features</span>
-<span class="c1"># whose null exceeds their observed importance.</span>
-<span class="n">FOCUS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">"abundance_controls"</span><span class="p">,</span>
-    <span class="s2">"nsp_secondary_structure_coil"</span><span class="p">,</span>
-    <span class="s2">"nsp_secondary_structure_helix"</span><span class="p">,</span>
-    <span class="s2">"secondary_structure_fraction_sheet"</span><span class="p">,</span>
-    <span class="s2">"zeta_potential"</span><span class="p">,</span>
-    <span class="s2">"dh_functionalized"</span><span class="p">,</span>
-    <span class="s2">"dtem"</span><span class="p">,</span>
-<span class="p">]</span>
-
-<span class="n">altmann_view</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-        <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">altmann</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">gini_observed</span><span class="o">=</span><span class="n">observed</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">TARGETS</span><span class="p">},</span>
-        <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"model"</span><span class="p">,</span> <span class="s2">"feature"</span><span class="p">],</span>
-    <span class="p">)</span>
-    <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s2">"model"</span><span class="p">,</span> <span class="s2">"feature"</span><span class="p">,</span> <span class="s2">"gini_observed"</span><span class="p">,</span> <span class="s2">"null_mean"</span><span class="p">,</span> <span class="s2">"p_altmann"</span><span class="p">,</span> <span class="s2">"p_altmann_bh"</span><span class="p">]]</span>
-<span class="p">)</span>
-<span class="n">altmann_view</span><span class="p">[</span><span class="s2">"significant"</span><span class="p">]</span> <span class="o">=</span> <span class="n">altmann_view</span><span class="o">.</span><span class="n">p_altmann_bh</span> <span class="o">&lt;</span> <span class="mf">0.05</span>
-
-<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">TARGETS</span><span class="p">:</span>
-    <span class="n">sig</span> <span class="o">=</span> <span class="n">altmann_view</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">"model == @name and significant"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> significant -&gt; </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">feature</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sig</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">' features'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-<span class="n">altmann_view</span><span class="p">[</span><span class="n">altmann_view</span><span class="o">.</span><span class="n">feature</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">FOCUS</span><span class="p">)]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=3240d669">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>RFC: 32/84 significant -&gt; 32 features
 RFR: 3/84 significant -&gt; abundance_controls, nsp_secondary_structure_coil, nsp_secondary_structure_helix
@@ -7898,7 +7737,6 @@ RFR: 3/84 significant -&gt; abundance_controls, nsp_secondary_structure_coil, ns
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8080,8 +7918,7 @@ RFR: 3/84 significant -&gt; abundance_controls, nsp_secondary_structure_coil, ns
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Both models separate from their nulls, but by very different margins. The classifier clears
 BH at 5 % for 32 of 84 features, six of the seven in the parsimonious set. The regressor
 clears 3: <code>abundance_controls</code> (observed Gini 0.674 against a null mean of 0.005),
@@ -8107,8 +7944,7 @@ and it is rejected for being continuous rather than for being uninformative.</p>
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Out-of-fold-permutation-importance">Out-of-fold permutation importance<a class="anchor-link" href="#Out-of-fold-permutation-importance">¶</a></h2><p>Ten folds, ten repeats per fold, giving 100 measurements per feature: the drop in held-out
 performance when one column is shuffled.</p>
 <p>Both models are grouped by protein here, including the regressor, which is grouped by
@@ -8124,112 +7960,72 @@ would zero out a feature the model keeps.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4f6bee22">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># `oof_permutation_importance` (corona.py): the same folds, seeds and repeats as</span>
-<span class="c1"># `unified.ipynb`, so the RFC rows reproduce its `classifier_permutation_importance.csv`.</span>
-<span class="n">oof_perm</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">scoring</span><span class="p">)</span> <span class="ow">in</span> <span class="n">TARGETS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">vals</span> <span class="o">=</span> <span class="n">oof_permutation_importance</span><span class="p">(</span>
-        <span class="n">Model</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="n">feature_columns</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="n">proteins</span><span class="p">,</span> <span class="n">scoring</span><span class="p">,</span> <span class="n">N_FOLDS</span><span class="p">,</span> <span class="n">PERM_REPEATS</span>
-    <span class="p">)</span>
-    <span class="n">oof_perm</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-        <span class="p">{</span>
-            <span class="s2">"perm_mean"</span><span class="p">:</span> <span class="n">vals</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
-            <span class="s2">"perm_ci_low"</span><span class="p">:</span> <span class="n">vals</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.025</span><span class="p">),</span>
-            <span class="s2">"perm_ci_high"</span><span class="p">:</span> <span class="n">vals</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.975</span><span class="p">),</span>
-            <span class="s2">"perm_ci_excludes_zero"</span><span class="p">:</span> <span class="n">vals</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.025</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">oof_perm</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">perm_ci_excludes_zero</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> features with CI above zero"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=4f6bee22">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>RFC
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 1/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 2/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 3/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 4/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 5/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 6/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 7/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 8/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 9/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 10/10
 RFC: 1/84 features with CI above zero
@@ -8238,70 +8034,60 @@ RFR
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 1/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 2/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 3/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 4/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 5/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 6/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 7/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 8/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 9/10
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  fold 10/10
 RFR: 1/84 features with CI above zero
@@ -8310,33 +8096,12 @@ RFR: 1/84 features with CI above zero
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=12252f63">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Top five by mean held-out importance per model, with the interval that decides</span>
-<span class="c1"># `perm_ci_excludes_zero`.</span>
-<span class="n">perm_view</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="n">n</span><span class="p">:</span> <span class="n">oof_perm</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">TARGETS</span><span class="p">},</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"model"</span><span class="p">,</span> <span class="s2">"feature"</span><span class="p">])</span>
-    <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">"model"</span><span class="p">,</span> <span class="s2">"perm_mean"</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span>
-<span class="p">)</span>
-<span class="n">perm_view</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"model"</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=12252f63">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8467,8 +8232,7 @@ RFR: 1/84 features with CI above zero
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>One feature per model has a 95 % interval strictly above zero:
 <code>secondary_structure_fraction_sheet</code> for the classifier and <code>abundance_controls</code> for the
 regressor. Treating "interval excludes zero" as the bar for contributing would leave a single
@@ -8486,62 +8250,24 @@ permutation <em>mean</em> rather than its interval is the useful column here.</p
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Combined-table">Combined table<a class="anchor-link" href="#Combined-table">¶</a></h2><p>One row per feature per model: observed importance, bootstrap interval, Altmann null and
 p-values, and out-of-fold permutation importance.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=68930517">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">supplementary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-    <span class="p">{</span>
-        <span class="n">name</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">observed</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"gini_observed"</span><span class="p">),</span>
-                <span class="n">bootstrap</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"gini_boot_mean"</span><span class="p">),</span>
-                <span class="n">bootstrap</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.025</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"gini_boot_ci_low"</span><span class="p">),</span>
-                <span class="n">bootstrap</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.975</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"gini_boot_ci_high"</span><span class="p">),</span>
-                <span class="n">altmann</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
-                <span class="n">oof_perm</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
-            <span class="p">],</span>
-            <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">TARGETS</span>
-    <span class="p">},</span>
-    <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"model"</span><span class="p">,</span> <span class="s2">"feature"</span><span class="p">],</span>
-<span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-<span class="n">supplementary</span> <span class="o">=</span> <span class="n">supplementary</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span>
-    <span class="p">[</span><span class="s2">"model"</span><span class="p">,</span> <span class="s2">"gini_observed"</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
-<span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"RFC, top 15 by observed Gini:"</span><span class="p">)</span>
-<span class="n">supplementary</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">"model == 'RFC'"</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=68930517">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>RFC, top 15 by observed Gini:
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8840,34 +8566,18 @@ p-values, and out-of-fold permutation importance.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b7f2f919">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"RFR, top 15 by observed Gini:"</span><span class="p">)</span>
-<span class="n">supplementary</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">"model == 'RFR'"</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=b7f2f919">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>RFR, top 15 by observed Gini:
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -9171,8 +8881,7 @@ p-values, and out-of-fold permutation importance.</p>
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Pairwise-rank-stability">Pairwise rank stability<a class="anchor-link" href="#Pairwise-rank-stability">¶</a></h2><p>Each bootstrap replicate refits on the same resampled proteins, so the difference between
 two features' importances is paired within a replicate. The one-sided p-value is the
 fraction of replicates whose difference contradicts the observed ordering, doubled for a
@@ -9180,54 +8889,12 @@ two-sided test and adjusted across the 190 pairs.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=37d826fe">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">rank_rows</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">TARGETS</span><span class="p">:</span>
-    <span class="n">top</span> <span class="o">=</span> <span class="n">observed</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">TOP_K</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="n">boot</span> <span class="o">=</span> <span class="n">bootstrap</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">top</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-    <span class="n">pairs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">TOP_K</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">TOP_K</span><span class="p">):</span>
-            <span class="n">diff</span> <span class="o">=</span> <span class="n">boot</span><span class="p">[:,</span> <span class="n">a</span><span class="p">]</span> <span class="o">-</span> <span class="n">boot</span><span class="p">[:,</span> <span class="n">b</span><span class="p">]</span>
-            <span class="n">obs</span> <span class="o">=</span> <span class="n">observed</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">top</span><span class="p">[</span><span class="n">a</span><span class="p">]]</span> <span class="o">-</span> <span class="n">observed</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">top</span><span class="p">[</span><span class="n">b</span><span class="p">]]</span>
-            <span class="n">p_one</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">diff</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">obs</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">diff</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">))</span>
-            <span class="n">pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">"model"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
-                    <span class="s2">"feature_higher"</span><span class="p">:</span> <span class="n">top</span><span class="p">[</span><span class="n">a</span><span class="p">],</span>
-                    <span class="s2">"feature_lower"</span><span class="p">:</span> <span class="n">top</span><span class="p">[</span><span class="n">b</span><span class="p">],</span>
-                    <span class="s2">"observed_diff"</span><span class="p">:</span> <span class="n">obs</span><span class="p">,</span>
-                    <span class="s2">"p_two_sided"</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">p_one</span><span class="p">),</span>
-                <span class="p">}</span>
-            <span class="p">)</span>
-    <span class="n">frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
-    <span class="n">frame</span><span class="p">[</span><span class="s2">"p_bh"</span><span class="p">]</span> <span class="o">=</span> <span class="n">multipletests</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">p_two_sided</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"fdr_bh"</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">frame</span><span class="p">[</span><span class="s2">"ordering_resolved"</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">p_bh</span> <span class="o">&lt;</span> <span class="mf">0.05</span>
-    <span class="n">rank_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">frame</span><span class="o">.</span><span class="n">ordering_resolved</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span><span class="si">}</span><span class="s2"> of the "</span>
-          <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">TOP_K</span><span class="si">}</span><span class="s2">-feature pairs have a resolvable ordering"</span><span class="p">)</span>
-
-<span class="n">rank_stability</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">rank_rows</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="c1"># Five pairs per model rather than the first ten, which were all classifier rows.</span>
-<span class="n">rank_stability</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">'model'</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=37d826fe">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>RFC: 54/190 of the 20-feature pairs have a resolvable ordering
 RFR: 25/190 of the 20-feature pairs have a resolvable ordering
@@ -9235,7 +8902,6 @@ RFR: 25/190 of the 20-feature pairs have a resolvable ordering
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -9377,8 +9043,7 @@ RFR: 25/190 of the 20-feature pairs have a resolvable ordering
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Most of the ordering is noise: 54 of 190 pairs resolve for the classifier and 25 of 190 for
 the regressor. The pairs that do resolve are mostly those involving the one dominant feature
 in each model, <code>zeta_potential</code> and <code>abundance_controls</code> respectively, which separate from
@@ -9389,28 +9054,12 @@ and small differences in rank between them carry no information.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b94a6020">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">supplementary</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">"feature_importance_supplementary.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">rank_stability</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">"importance_rank_stability.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"wrote 2 tables to"</span><span class="p">,</span> <span class="n">DATA_DIR</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=b94a6020">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>wrote 2 tables to data
 </pre>

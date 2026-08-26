@@ -43,6 +43,6 @@ The HTML reports in `reports/` are rendered from the executed notebooks (run the
 ```bash
 cd notebooks
 for nb in unified importance_significance reviewer_response; do
-    jupyter nbconvert --to html --output-dir ../reports --output "${nb}_report.html" "$nb.ipynb"
+    jupyter nbconvert --to html --no-input --output-dir ../reports --output "${nb}_report.html" "$nb.ipynb"
 done
 ```
